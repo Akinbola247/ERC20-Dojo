@@ -1,6 +1,7 @@
 [package]
 cairo-version = "2.2.0"
-name = "dojo_examples"
+description = "Implementations of ERC standards for the Dojo framework"
+name = "dojo_erc"
 version = "0.3.0"
 
 [cairo]
