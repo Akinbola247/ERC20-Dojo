@@ -1,4 +1,6 @@
 use starknet::ContractAddress;
+use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
+
 
 
 #[starknet::interface]

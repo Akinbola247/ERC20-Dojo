@@ -8,27 +8,27 @@ use dojo_erc::utils;
 use dojo_erc::constants::{
     ZERO, OWNER, SPENDER, RECIPIENT, NAME, SYMBOL, DECIMALS, SUPPLY, VALUE
 };
-use dojo_erc::erc_20::ERC20::Approval;
-use dojo_erc::erc_20::ERC20::ERC20Impl;
-use dojo_erc::erc_20::ERC20::InternalImpl;
-use dojo_erc::erc_20::ERC20::Transfer;
-use dojo_erc::erc_20::ERC20;
+use dojo_erc::erc20_contract::ERC20::Approval;
+use dojo_erc::erc20_contract::ERC20::ERC20Impl;
+use dojo_erc::erc20_contract::ERC20::InternalImpl;
+use dojo_erc::erc20_contract::ERC20::Transfer;
+use dojo_erc::erc20_contract::ERC20;
 use starknet::ContractAddress;
 use starknet::contract_address_const;
 use starknet::testing;
 use zeroable::Zeroable;
 use dojo::test_utils::spawn_test_world;
 use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
-use dojo_erc::erc_20::{IERC20Dispatcher, IERC20DispatcherTrait};
+use dojo_erc::erc20_contract::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 use dojo_erc::erc20_models::{
     ERC20Allowance, erc_20_allowance, ERC20Balance, erc_20_balance, ERC20Meta, erc_20_meta
 };
-use dojo_erc::erc_20::ERC20::_worldContractMemberStateTrait;
+use dojo_erc::erc20_contract::ERC20::_worldContractMemberStateTrait;
 use debug::PrintTrait;
 
 
-fn STATE() -> (IWorldDispatcher, dojo_erc::erc_20::ERC20::ContractState) {
+fn STATE() -> (IWorldDispatcher, dojo_erc::erc20_contract::ERC20::ContractState) {
     let world = spawn_test_world(
         array![
             erc_20_allowance::TEST_CLASS_HASH,
@@ -36,12 +36,12 @@ fn STATE() -> (IWorldDispatcher, dojo_erc::erc_20::ERC20::ContractState) {
             erc_20_meta::TEST_CLASS_HASH,
         ]
     );
-    let mut state = dojo_erc::erc_20::ERC20::contract_state_for_testing();
+    let mut state = dojo_erc::erc20_contract::ERC20::contract_state_for_testing();
     state._world.write(world.contract_address);
     (world, state)
 }
 
-fn setup() -> dojo_erc::erc_20::ERC20::ContractState {
+fn setup() -> dojo_erc::erc20_contract::ERC20::ContractState {
     let (world, mut state) = STATE();
     ERC20::constructor(ref state, world.contract_address, NAME, SYMBOL, SUPPLY, OWNER());
     utils::drop_event(ZERO());

@@ -1,4 +1,4 @@
-mod erc_20;
+mod ERC20_contract;
 mod erc20_models;
 mod tests;
 mod utils;
