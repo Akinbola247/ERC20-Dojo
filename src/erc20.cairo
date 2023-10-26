@@ -16,6 +16,8 @@ trait IERC20<TState> {
         ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
     ) -> bool;
     fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
+    fn initialize(ref self: TState, name: felt252, symbol: felt252, world : ContractAddress, recipient : ContractAddress, initial_supply : u256) -> bool;
+    fn mint_(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
 }
 
 trait IERC20CamelOnly<TState> {
@@ -27,8 +29,9 @@ trait IERC20CamelOnly<TState> {
 }
 
 #[starknet::contract]
-mod ERC20 {
-    use dojo_erc::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
+mod erc_systems {
+    use core::option::OptionTrait;
+use dojo_erc::models::{ERC20Allowance, ERC20Balance, ERC20Meta};
     use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
     use integer::BoundedInt;
     use super::IERC20;
@@ -72,20 +75,6 @@ mod ERC20 {
         const TRANSFER_TO_ZERO: felt252 = 'ERC20: transfer to 0';
         const BURN_FROM_ZERO: felt252 = 'ERC20: burn from 0';
         const MINT_TO_ZERO: felt252 = 'ERC20: mint to 0';
-    }
-
-    #[constructor]
-    fn constructor(
-        ref self: ContractState,
-        world: ContractAddress,
-        name: felt252,
-        symbol: felt252,
-        initial_supply: u256,
-        recipient: ContractAddress
-    ) {
-        self._world.write(world);
-        self.initializer(name, symbol);
-        self._mint(recipient, initial_supply);
     }
 
     //
@@ -144,6 +133,16 @@ mod ERC20 {
                 .set_allowance(
                     ERC20Allowance { token: get_contract_address(), owner, spender, amount }
                 );
+            true
+        }
+        fn initialize(ref self: ContractState, name: felt252, symbol: felt252, world : ContractAddress, recipient : ContractAddress, initial_supply : u256) -> bool {
+            self._world.write(world);
+            self.initializer(name,symbol);
+            self._mint(recipient, initial_supply);
+            true
+        }
+        fn mint_(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool{
+            self._mint(recipient, amount);
             true
         }
     }
@@ -269,11 +268,7 @@ mod ERC20 {
                 );
         }
 
-        fn emit_event<
-            S, impl IntoImp: traits::Into<S, Event>, impl SDrop: Drop<S>, impl SCopy: Copy<S>
-        >(
-            ref self: ContractState, event: S
-        ) {
+        fn emit_event<S, impl IntoImp: traits::Into<S, Event>, impl SDrop: Drop<S>, impl SCopy: Copy<S>>(ref self: ContractState, event: S) {
             self.emit(event);
             emit!(self.world(), event);
         }

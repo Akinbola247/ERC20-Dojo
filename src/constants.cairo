@@ -1,5 +1,7 @@
 use starknet::ContractAddress;
 use starknet::contract_address_const;
+use core::option::OptionTrait;
+use traits::TryInto;
 
 const NAME: felt252 = 'NAME';
 const SYMBOL: felt252 = 'SYMBOL';
