@@ -6,9 +6,15 @@ sozo build
 ```shell
 sozo test
 ```
-# Migrate 
+# Migrate/deployment 
 ```shell
 sozo migrate
 ```
-# Deployment
-Using starkli
+# interaction
+```shell
+sozo execute <ContractAddress> <entrypoint>
+
+with argument
+
+sozo execute <ContractAddress> <entrypoint> --calldata 
+```

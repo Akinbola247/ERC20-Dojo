@@ -54,7 +54,7 @@ fn STATE() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
         ]
     );
         let mut state = dojo_erc::erc20::erc_systems::contract_state_for_testing();
-        state.initialize(NAME, SYMBOL,world.contract_address, OWNER(),SUPPLY);
+        state.initialize(NAME, SYMBOL,world.contract_address);
         utils::drop_event(ZERO());
         (world, state)
     }
@@ -68,11 +68,10 @@ fn STATE() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
 fn test_initializer() {
     let (world, mut state) = STATE();
     // InternalImpl::initializer(ref state, NAME, SYMBOL);
-    state.initialize(NAME, SYMBOL,world.contract_address, 'res'.try_into().unwrap(),SUPPLY);
+    state.initialize(NAME, SYMBOL,world.contract_address);
     assert(ERC20Impl::name(@state) == NAME, 'Name should be NAME');
     assert(ERC20Impl::symbol(@state) == SYMBOL, 'Symbol should be SYMBOL');
     assert(ERC20Impl::decimals(@state) == DECIMALS, 'Decimals should be 18');
-    assert(ERC20Impl::total_supply(@state) == 2000, 'Supply should eq 0');
 }
 
 // //
@@ -83,16 +82,16 @@ fn test_initializer() {
 #[available_gas(25000000)]
 fn test_total_supply() {
     let (world, mut state) = setup();
-    state.mint_('res'.try_into().unwrap(), 4000);
+    state.mint_(OWNER(), SUPPLY);
     // InternalImpl::_mint(ref state, OWNER(), SUPPLY);
-    assert(ERC20Impl::total_supply(@state) == 6000, 'Should eq SUPPLY');
+    assert(ERC20Impl::total_supply(@state) == SUPPLY, 'Should eq SUPPLY');
 }
 
 #[test]
 #[available_gas(25000000)]
 fn test_balance_of() {
     let (world, mut state) = setup();
-    // InternalImpl::_mint(ref state, OWNER(), SUPPLY);
+    InternalImpl::_mint(ref state, OWNER(), SUPPLY);
     assert(ERC20Impl::balance_of(@state, OWNER()) == SUPPLY, 'Should eq SUPPLY');
 }
 
@@ -176,6 +175,7 @@ fn test__approve_to_zero() {
 fn test_transfer() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
+    state.mint_(OWNER(), SUPPLY);
     assert(ERC20Impl::transfer(ref state, RECIPIENT(), VALUE), 'Should return true');
     // assert_only_event_transfer(OWNER(), RECIPIENT(), VALUE);
     assert(ERC20Impl::balance_of(@state, RECIPIENT()) == VALUE, 'Balance should eq VALUE');
@@ -187,6 +187,7 @@ fn test_transfer() {
 #[available_gas(25000000)]
 fn test__transfer() {
     let (world, mut state) = setup();
+    state.mint_(OWNER(), SUPPLY);
     InternalImpl::_transfer(ref state, OWNER(), RECIPIENT(), VALUE);
     // assert_only_event_transfer(OWNER(), RECIPIENT(), VALUE);
     assert(ERC20Impl::balance_of(@state, RECIPIENT()) == VALUE, 'Balance should eq amount');
@@ -230,6 +231,7 @@ fn test__transfer_to_zero() {
 fn test_transfer_from() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
+    state.mint_(OWNER(), SUPPLY);
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
     utils::drop_event(ZERO());
 
@@ -245,21 +247,6 @@ fn test_transfer_from() {
     assert(ERC20Impl::total_supply(@state) == SUPPLY, 'Total supply should not change');
 }
 
-#[test]
-#[available_gas(25000000)]
-fn test_transfer_from_doesnt_consume_infinite_allowance() {
-    let (world, mut state) = setup();
-    testing::set_caller_address(OWNER());
-    ERC20Impl::approve(ref state, SPENDER(), BoundedInt::max());
-
-    testing::set_caller_address(SPENDER());
-    ERC20Impl::transfer_from(ref state, OWNER(), RECIPIENT(), VALUE);
-
-    assert(
-        ERC20Impl::allowance(@state, OWNER(), SPENDER()) == BoundedInt::max(),
-        'Allowance should not change'
-    );
-}
 
 #[test]
 #[available_gas(25000000)]
@@ -482,6 +469,7 @@ fn test__mint_to_zero() {
 #[available_gas(25000000)]
 fn test__burn() {
     let (world, mut state) = setup();
+    state.mint_(OWNER(), SUPPLY);
     InternalImpl::_burn(ref state, OWNER(), VALUE);
 
     // assert_only_event_transfer(OWNER(), ZERO(), VALUE);

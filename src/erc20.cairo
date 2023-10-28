@@ -16,7 +16,7 @@ trait IERC20<TState> {
         ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
     ) -> bool;
     fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
-    fn initialize(ref self: TState, name: felt252, symbol: felt252, world : ContractAddress, recipient : ContractAddress, initial_supply : u256) -> bool;
+    fn initialize(ref self: TState, name: felt252, symbol: felt252, world : ContractAddress) -> bool;
     fn mint_(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
 }
 
@@ -135,10 +135,9 @@ use dojo_erc::models::{ERC20Allowance, ERC20Balance, ERC20Meta};
                 );
             true
         }
-        fn initialize(ref self: ContractState, name: felt252, symbol: felt252, world : ContractAddress, recipient : ContractAddress, initial_supply : u256) -> bool {
+        fn initialize(ref self: ContractState, name: felt252, symbol: felt252, world : ContractAddress) -> bool {
             self._world.write(world);
             self.initializer(name,symbol);
-            self._mint(recipient, initial_supply);
             true
         }
         fn mint_(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool{
